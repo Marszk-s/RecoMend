@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecoMend - Share Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.cdnfonts.com/css/estrella" rel="stylesheet">
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/estrella');
+
+        :root {
+            --color-black: #000000;
+            --color-aruba: #7DD1D1;
+        }
+
+        body {
+            font-family: 'Estrella', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .brand-text {
+            font-family: 'Estrella', sans-serif;
+            color: var(--color-aruba);
+            font-size: 2.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--color-aruba);
+            color: var(--color-black);
+        }
+
+        .btn-primary:hover {
+            background-color: #6BC0C0;
+        }
+
+        .nav-active {
+            color: var(--color-aruba);
+            border-bottom: 2px solid var(--color-aruba);
+        }
+
+        .auth-modal {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        black: '#000000',
+                        aruba: '#7DD1D1',
+                    },
+                    fontFamily: {
+                        'estrella': ['Estrella', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-black shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <h1 class="brand-text">RecoMend</h1>
+                <div class="flex items-center space-x-4">
+                    <span id="userDisplay" class="text-aruba"></span>
+                    <img id="headerProfilePicture" src="https://via.placeholder.com/32" alt="Profile" class="w-8 h-8 rounded-full hidden">
+                    <button id="logoutBtn" class="text-aruba hover:text-white hidden">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal fixed inset-0 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold mb-6 text-center brand-text">Welcome to RecoMend</h2>
+            <p class="text-gray-600 text-center mb-6">Sign in to share recommendations with friends</p>
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" name="uniqueUsername" placeholder="@example" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aruba focus:ring focus:ring-aruba focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" name="email" placeholder="you@example.com" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aruba focus:ring focus:ring-aruba focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                    <input type="text" name="displayName" placeholder="Your Name" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aruba focus:ring focus:ring-aruba focus:ring-opacity-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" name="password" placeholder="••••••••" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-aruba focus:ring focus:ring-aruba focus:ring-opacity-50">
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-aruba hover:bg-aruba-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-aruba-500">
+                    Sign In
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <button id="toggleAuth" class="text-sm text-aruba hover:text-aruba-600">
+                    Create Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md mb-6">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center space-x-8 py-3">
+                <button class="tab-btn active px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-aruba" data-tab="home">
+                    <i class="fas fa-home mr-2"></i>Home
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-gray-600 hover:text-aruba" data-tab="friends">
+                    <i class="fas fa-user-friends mr-2"></i>Friends
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-gray-600 hover:text-aruba" data-tab="add">
+                    <i class="fas fa-plus mr-2"></i>Add
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-gray-600 hover:text-aruba" data-tab="view">
+                    <i class="fas fa-list mr-2"></i>View
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-12">
+        <!-- Home Section -->
+        <section id="home" class="tab-content active">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-aruba" id="friendCount">0</p>
+                            <p class="text-gray-600">Friends</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-aruba" id="recommendationCount">0</p>
+                            <p class="text-gray-600">Recommendations</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="text-center">
+                            <p class="text-2xl font-bold text-aruba" id="pendingCount">0</p>
+                            <p class="text-gray-600">Pending</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+                    <div id="recentActivity" class="space-y-4">
+                        <!-- Activity items will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Latest Recommendations -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Latest Recommendations</h2>
+                    <div id="latestRecommendations" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Recommendation cards will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Friends Section -->
+        <section id="friends" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- Search Friends -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Find Friends</h2>
+                    <div class="flex space-x-4">
+                        <input type="text" id="searchUsername" placeholder="Search by username (@example)"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aruba focus:border-aruba">
+                        <button id="searchUserBtn" class="px-4 py-2 bg-aruba text-black rounded-lg hover:bg-aruba-600">
+                            Search
+                        </button>
+                    </div>
+                    <div id="searchResults" class="mt-4 space-y-4">
+                        <!-- Search results will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Friend Requests -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Friend Requests</h2>
+                    <div id="friendRequests" class="space-y-4">
+                        <!-- Friend requests will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Friends List -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-4">Your Friends</h2>
+                    <div id="friendsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Friends list will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Recommendation Section -->
+        <section id="add" class="tab-content hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-bold mb-6">Add New Recommendation</h2>
+                    <form id="recommendationForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Send To</label>
+                            <select id="recipient" name="recipient" required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-aruba focus:border-aruba">
+                                <option value="">Select Friend</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Type</label>
+                            <select name="type" required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-aruba focus:border-aruba">
+                                <option value="">Select Type</option>
+                                <option value="movie">Movie</option>
+                                <option value="series">TV Series</option>
+                                <option value="music">Music</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Title</label>
+                            <input type="text" name="title" required
+                                   class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-aruba focus:border-aruba">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Platform</label>
+                            <select name="platform" required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-aruba focus:border-aruba">
+                                <option value="">Select Platform</option>
+                                <option value="netflix">Netflix</option>
+                                <option value="amazon">Amazon Prime</option>
+                                <option value="disney">Disney+</option>
+                                <option value="hulu">Hulu</option>
+                                <option value="spotify">Spotify</option>
+                                <option value="apple">Apple Music</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea name="description" rows="3"
+                                      class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-aruba focus:border-aruba"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-2 px-4 bg-aruba text-black rounded-lg hover:bg-aruba-600">
+                            Send Recommendation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- View Recommendations Section -->
+        <section id="view" class="tab-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">Your Recommendations</h2>
+                    <div class="flex space-x-2">
+                        <button id="filterReceived" class="filter-btn px-3 py-1 rounded-full bg-aruba text-black">
+                            Received
+                        </button>
+                        <button id="filterSent" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+                            Sent
+                        </button>
+                    </div>
+                </div>
+                <div class="flex space-x-4 mb-4">
+                    <button id="filterAll" class="type-filter-btn px-3 py-1 rounded-full bg-aruba text-black">
+                        All
+                    </button>
+                    <button id="filterMovies" class="type-filter-btn px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+                        Movies
+                    </button>
+                    <button id="filterSeries" class="type-filter-btn px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+                        Series
+                    </button>
+                    <button id="filterMusic" class="type-filter-btn px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+                        Music
+                    </button>
+                </div>
+                <div id="recommendationsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Recommendations will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold"></h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent"></div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
